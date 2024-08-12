@@ -194,11 +194,15 @@ class BlitSdma : public BlitSdmaBase {
   /// @brief Build fence command
   void BuildFenceCommand(char* fence_command_addr, uint32_t* fence,
                          uint32_t fence_value);
+  hsa_status_t FireFenceCommand(uint32_t* fence, uint32_t fence_value);
 
   /// @brief Build Hdp Flush command
   void BuildHdpFlushCommand(char* cmd_addr);
+  hsa_status_t FireHdpFlushCommand();
 
   void BuildCopyCommand(char* cmd_addr, uint32_t num_copy_command, void* dst,
+                        const void* src, size_t size);
+  hsa_status_t FireCopyCommand(uint32_t num_copy_command, void* dst,
                         const void* src, size_t size);
 
   void BuildCopyRectCommand(const std::function<void*(size_t)>& append,
@@ -210,16 +214,26 @@ class BlitSdma : public BlitSdmaBase {
                         size_t count);
 
   void BuildPollCommand(char* cmd_addr, void* addr, uint32_t reference);
+  hsa_status_t FirePollCommand(void* addr, uint32_t reference);
 
   void BuildAtomicDecrementCommand(char* cmd_addr, void* addr);
+  hsa_status_t FireAtomicDecrementCommand(void* addr);
 
   void BuildGetGlobalTimestampCommand(char* cmd_addr, void* write_address);
+  hsa_status_t FireGetGlobalTimestampCommand(void* write_address);
 
   void BuildTrapCommand(char* cmd_addr, uint32_t event_id);
+  hsa_status_t FireTrapCommand(uint32_t event_id);
 
   void BuildGCRCommand(char* cmd_addr, bool invalidate);
+  hsa_status_t FireGCRCommand(bool invalidate);
 
   hsa_status_t SubmitCommand(const void* cmds, size_t cmd_size, uint64_t size,
+                             const std::vector<core::Signal*>& dep_signals,
+                             core::Signal& out_signal, std::vector<core::Signal*>& gang_signals);
+
+  template <typename func_t>
+  hsa_status_t SubmitCommand(const func_t &f, uint64_t size,
                              const std::vector<core::Signal*>& dep_signals,
                              core::Signal& out_signal, std::vector<core::Signal*>& gang_signals);
 
